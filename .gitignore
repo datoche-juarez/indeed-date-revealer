@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# node (if you later add tooling)
+node_modules/
+
+# VS Code settings
+.vscode/
+
+# zip export
+*.zip
