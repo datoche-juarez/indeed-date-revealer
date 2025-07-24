@@ -143,6 +143,7 @@
         titleEl.insertAdjacentElement("afterend", badge);
 
         requestAnimationFrame(() => {
+          void badge.offsetWidth; // Force reflow
           badge.style.transition = "opacity 1.4s ease";
           badge.style.opacity = "1";
         });
