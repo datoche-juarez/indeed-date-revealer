@@ -23,6 +23,14 @@ The extension will now run automatically on Indeed job listings.
 
 Indeed embeds job metadata (like `datePosted`) in a hidden `<script type="application/ld+json">` tag. This extension parses that JSON, formats the date/time, and injects a styled badge into the job listing UI. It uses polling and a fade-in animation to gracefully survive dynamic page changes.
 
+## When the Extension Works
+
+📝 **Important**: This extension only works on **dedicated job listing pages**.
+
+- ✅ It works when you open an individual job listing in its own tab or page (e.g. `https://www.indeed.com/viewjob?...`)
+- ❌ It does **not** work on the **search results page**, which shows multiple job previews (with the sidebar layout). Those preview panels do not include the structured `datePosted` data.
+- 💡 To use the extension, simply **right-click a job listing and open it in a new tab**.
+
 ## Coming Soon
 
 - Options page for customizing colors or relative time format
