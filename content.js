@@ -20,7 +20,6 @@
   const now = new Date();
   const postedDate = new Date(datePosted);
 
-  // Full date + time
   const formattedDateTime = postedDate.toLocaleString(undefined, {
     year: "numeric",
     month: "long",
@@ -30,7 +29,6 @@
     hour12: true,
   });
 
-  // Calculate time difference
   const timeDiffMs = now - postedDate;
   const timeDiffMinutes = Math.floor(timeDiffMs / 60000);
   const timeDiffHours = Math.floor(timeDiffMinutes / 60);
@@ -38,54 +36,98 @@
   const timeDiffMonths = Math.floor(timeDiffDays / 30);
   const timeDiffYears = Math.floor(timeDiffDays / 365);
 
-  let relativeTime = "";
+  function isYesterday(date) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return (
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate()
+    );
+  }
 
+  let relativeTime = "";
   if (timeDiffMinutes < 10) {
     relativeTime = "Just posted";
   } else if (timeDiffMinutes < 60) {
-    relativeTime = `Posted ${timeDiffMinutes} minutes ago`;
+    relativeTime = `Posted ${timeDiffMinutes} minute${
+      timeDiffMinutes === 1 ? "" : "s"
+    } ago`;
   } else if (timeDiffHours < 8) {
-    relativeTime = `Posted ${timeDiffHours} hours ago`;
-  } else if (timeDiffHours < 24) {
+    relativeTime = `Posted ${timeDiffHours} hour${
+      timeDiffHours === 1 ? "" : "s"
+    } ago`;
+  } else if (isYesterday(postedDate)) {
     relativeTime = "Posted yesterday";
   } else if (timeDiffDays < 30) {
-    relativeTime = `Posted ${timeDiffDays} days ago`;
+    relativeTime = `Posted ${timeDiffDays} day${
+      timeDiffDays === 1 ? "" : "s"
+    } ago`;
   } else if (timeDiffDays < 365) {
     relativeTime = `Posted ${timeDiffMonths} month${
-      timeDiffMonths > 1 ? "s" : ""
+      timeDiffMonths === 1 ? "" : "s"
     } ago`;
   } else {
     relativeTime = `Posted over ${timeDiffYears} year${
-      timeDiffYears > 1 ? "s" : ""
+      timeDiffYears === 1 ? "" : "s"
     } ago`;
   }
 
-  // Adjust color intensity based on freshness
+  // Color + label logic
   let borderColor = "#aaa";
-  if (timeDiffMinutes < 10) borderColor = "#d93025"; // red
-  else if (timeDiffHours < 1) borderColor = "#1a73e8"; // bright blue
-  else if (timeDiffHours < 8) borderColor = "#3367d6"; // medium blue
-  else if (timeDiffHours < 24) borderColor = "#2557a7"; // normal blue
+  let backgroundColor = "#f3f6fb";
+  let pillColor = "#aaa";
+  let pillLabel = "📁 Old";
+
+  if (timeDiffMinutes < 10) {
+    borderColor = "#d93025";
+    pillColor = "#d93025";
+    pillLabel = "🔥 Just posted";
+    backgroundColor = "#fdecea";
+  } else if (timeDiffHours < 1) {
+    borderColor = "#ea8600";
+    pillColor = "#ea8600";
+    pillLabel = "🚨 New";
+    backgroundColor = "#fff4e5";
+  } else if (timeDiffHours < 8) {
+    borderColor = "#4285f4";
+    pillColor = "#4285f4";
+    pillLabel = "⏳ Recent";
+  } else if (isYesterday(postedDate)) {
+    borderColor = "#2557a7";
+    pillColor = "#2557a7";
+    pillLabel = timeDiffHours < 24 ? "🕒 < 24 hrs ago" : "🕒 > 24 hrs ago";
+  }
 
   const badge = document.createElement("div");
   badge.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="${borderColor}" viewBox="0 0 16 16" style="margin-right: 6px; vertical-align: text-bottom;">
-      <path d="M2 2h1V0h1v2h6V0h1v2h1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm12 12V7H2v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1zm0-9V4a1 1 0 0 0-1-1h-1v1h-1V3H5v1H4V3H3a1 1 0 0 0-1 1v1h12z"/>
-    </svg>
-    <span style="font-weight: 500;">${relativeTime}</span>
-    <br />
-    <span style="font-size: 12px; color: #595959;">(${formattedDateTime})</span>
+    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="${borderColor}" viewBox="0 0 16 16" style="vertical-align: text-bottom;">
+        <path d="M2 2h1V0h1v2h6V0h1v2h1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm12 12V7H2v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1zm0-9V4a1 1 0 0 0-1-1h-1v1h-1V3H5v1H4V3H3a1 1 0 0 0-1 1v1h12z"/>
+      </svg>
+      <span style="font-weight: 500;">${relativeTime}</span>
+      <span style="
+        display: inline-block;
+        padding: 2px 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        background-color: ${pillColor};
+        border-radius: 10px;
+      ">${pillLabel}</span>
+    </div>
+    <div style="font-size: 12px; color: #595959;">(${formattedDateTime})</div>
   `;
 
   badge.style.cssText = `
-    background-color: #f3f6fb;
+    background-color: ${backgroundColor};
     color: #1a1a1a;
-    padding: 8px 12px;
+    padding: 10px 12px;
     margin: 12px 0;
     font-size: 14px;
-    border-left: 4px solid ${borderColor};
+    border-left: 6px solid ${borderColor};
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    border-radius: 4px;
+    border-radius: 6px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     opacity: 0;
   `;
@@ -100,7 +142,6 @@
       if (!alreadyPresent) {
         titleEl.insertAdjacentElement("afterend", badge);
 
-        // Fade-in animation
         requestAnimationFrame(() => {
           badge.style.transition = "opacity 1.4s ease";
           badge.style.opacity = "1";
